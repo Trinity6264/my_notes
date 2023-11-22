@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart' show ReadContext;
 import 'package:my_notes/constants/routes.dart';
 import 'package:my_notes/enums/menu_action.dart';
 import 'package:my_notes/extensions/buildcontext/loc.dart';
@@ -9,7 +12,6 @@ import 'package:my_notes/services/cloud/cloud_note.dart';
 import 'package:my_notes/services/cloud/firebase_cloud_storage.dart';
 import 'package:my_notes/utilities/dialogs/logout_dialog.dart';
 import 'package:my_notes/views/notes/notes_list_view.dart';
-import 'package:flutter_bloc/flutter_bloc.dart' show ReadContext;
 
 extension Count<T extends Iterable> on Stream<T> {
   Stream<int> get getLength => map((event) => event.length);
@@ -34,6 +36,7 @@ class _NotesViewState extends State<NotesView> {
 
   @override
   Widget build(BuildContext context) {
+    log(userId);
     return Scaffold(
       appBar: AppBar(
         title: StreamBuilder(
@@ -60,7 +63,7 @@ class _NotesViewState extends State<NotesView> {
               switch (value) {
                 case MenuAction.logout:
                   final shouldLogout = await showLogOutDialog(context);
-                  if (shouldLogout) {
+                  if (shouldLogout && context.mounted) {
                     context.read<AuthBloc>().add(
                           const AuthEventLogOut(),
                         );
@@ -99,7 +102,15 @@ class _NotesViewState extends State<NotesView> {
                   },
                 );
               } else {
-                return const CircularProgressIndicator();
+                return const Align(
+                  child: Text(
+                    "No notes",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
               }
             default:
               return const CircularProgressIndicator();
